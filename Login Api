@@ -1,0 +1,128 @@
+package com.example.apicall;
+
+import android.nfc.Tag;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.URL;
+import okhttp3.FormBody;
+import okhttp3.FormBody.Builder;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+public class MainActivity extends AppCompatActivity {
+    TextView textView,textView2,textView3;
+    EditText editText, editText2;
+    Button button;
+    String message,result,status,username,password;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        textView = (TextView)findViewById(R.id.tv_api);
+        textView2=findViewById(R.id.tv_api2);
+        textView3=findViewById(R.id.tv_api3);
+        editText = (EditText)findViewById(R.id.et_user);
+        editText2 = (EditText)findViewById(R.id.et_pw);
+        button = (Button)findViewById(R.id.buttonclick);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String username = editText.getText().toString();
+                String password = editText2.getText().toString();
+                new Networkcall().execute();
+                new deposit();
+            }
+        });
+    }
+public class Networkcall extends AsyncTask<String,String,String>{
+        @Override
+    protected String doInBackground(String... strings) {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("TOKEN","hello_login")
+                .add("CLIENT-ID","359765078509044")
+                .add("userName","xyz")
+                .add("password","abc")
+                .build();
+        Request request = new Request.Builder()
+                .url("http://34.203.244.92/auth/admin/login")
+                .post(requestBody)
+                .build();
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            Log.d("abcdapi", "responce "+response);
+            String responsebody = response.body().string();
+            Log.d("abcdapi", "responcebody "+responsebody);
+            JSONObject jsonObject = new JSONObject(responsebody);
+//            JSONArray jsonArray = jsonObject.getJSONArray("");
+              message= jsonObject.getString("message");
+              result= jsonObject.getString("result");
+              status= jsonObject.getString("status");
+              runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    textView.setText(message);
+                    textView2.setText(result);
+                    textView3.setText(status);
+                }
+            });
+            Log.d("abcdapi", "recived message "+message +"  status done  "
+                    +status +"  result coming " +result);
+        } catch (IOException e) {
+
+        }
+        catch (JSONException jsonexcep){
+
+        }
+        return null;
+    }
+    }
+public class deposit extends AsyncTask<String,String,String>{
+
+    @Override
+    protected String doInBackground(String... strings) {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        RequestBody requestBody = new Builder()
+                .add("CLIENT-ID","dkjnvfnv")
+                .add("TOKEN","jggiih")
+                .add("agentImeiNo ","359765078509044")
+                .add("amount ","4567")
+                .add("atharNo ","987654326781")
+                .add("fingerPrint ","kjgbhggui")
+                .build();
+        Request request = new Request.Builder()
+                .url("http://34.203.244.92/postlogin/bank/transaction/depositAdhar")
+                .post(requestBody)
+                .build();
+
+            try {
+                Response responsed = okHttpClient.newCall(request).execute();
+                Log.d("depositapi", "good response "+responsed);
+                String responsebody = responsed.body().string();
+                Log.d("depositapi", "yeah doing good "+responsebody);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        return null;
+    }
+}
+
+}
+
